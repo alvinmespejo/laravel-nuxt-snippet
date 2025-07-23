@@ -4,7 +4,7 @@ import { useAsyncData, navigateTo } from '#app';
 interface ApiResponse<T> {
   data: T | null;
   error: any | null;
-  status: 'idle' | 'pending' | 'success' | 'error';
+  status: string | 'idle' | 'pending' | 'success' | 'error';
   execute: () => Promise<void>;
 }
 
@@ -18,15 +18,18 @@ interface ApiConfig {
   unauthorizedRedirect?: string; // Route to redirect to on 401
 }
 
+const { token } = useAuth()
+const configEnv = useRuntimeConfig();
+
 export function useAPI<TResponse, TBody = unknown>(config: ApiConfig = {}) {
   // Create a custom $fetch instance with a 401 interceptor
-  const { token } = useAuth()
-  const configEnv = useRuntimeConfig();
-
   const customFetch = $fetch.create({
     baseURL: `${configEnv.public.apiBaseURL}/api`,
     onRequest({ options }) {
-        options.headers.set('Authorization', `Bearer ${token}`);
+        if (token.value) {
+          options.headers.set('Authorization', `Bearer ${token.value}`);
+          options.headers.set('Content-Type', 'application/json');
+        }
     },
     async onResponseError({ response }) {
       if (response.status === 401) {

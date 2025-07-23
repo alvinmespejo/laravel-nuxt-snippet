@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\v1\StepStoreRequest;
 use App\Models\Snippet;
 use App\Models\Step;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -32,10 +33,14 @@ class StepController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, Snippet $snippet)
+    public function store(StepStoreRequest $request, Snippet $snippet)
     {
         try {
-            $step = $snippet->steps()->create($request->only('title', 'body'));
+            $data = array_merge($request->safe()->only('title', 'body'), [
+                'order' => $this->getOrder($request)
+            ]);
+
+            $step = $snippet->steps()->create($data);
             Log::debug('STEPS CREATE', [$step]);
             return response()->json($step, Response::HTTP_CREATED);
         } catch (\Throwable $th) {
@@ -44,22 +49,6 @@ class StepController extends Controller
                 'error' => 'An error occured while processing request. Please try again!'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Step $step)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Step $step)
-    {
-
     }
 
     /**
@@ -94,5 +83,22 @@ class StepController extends Controller
                 'error' => 'An error occured while processing request. Please try again!'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param Request $request
+     * @return void
+     */
+    private function getOrder(Request $request): float | int
+    {
+        $position = $request->position;
+        $uuid = $request->uuid;
+
+        return Step::query()
+            ->where('uuid', $uuid)
+            ->first()
+            ->{$position . 'Order'}();
     }
 }

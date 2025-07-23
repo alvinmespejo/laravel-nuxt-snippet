@@ -19,20 +19,49 @@
 </template>
 
 <script setup lang="ts">
-const handleAddStep = async() => {};
+const api = useAPI2()
 
-defineProps({
-  snippet: {
-    type: Object as PropType<Snippet>,
-    required: true,
-  },
-  currentStep: {
-    type: Object as PropType<Step>,
-    required: true,
-  },
-  position: {
-    required: true,
-    type: String as PropType<'before' | 'after'>,
-  },
-});
+interface Props {
+  snippet: Snippet;
+  currentStep: Step;
+  position: 'before' | 'after'
+}
+
+const props = defineProps<Props>();
+
+const emits = defineEmits<{
+  (e: 'added', payload: Step | null): void
+}>();
+
+interface Form {
+  [key:string]: any
+}
+
+const handleAddStep = async(_: MouseEvent) => {
+  let stepForm: Form = {
+    'position': props.position,
+    'uuid': props.currentStep.uuid 
+  }
+
+  let response = await api.post<Step, Form>(
+    `/snippets/${props.snippet.uuid}/steps`, stepForm,
+    { transform: (resp: { data: Step }): Step => resp.data }
+  )
+
+  emits('added', response.data)
+};
+// defineProps({
+//   snippet: {
+//     type: Object as PropType<Snippet>,
+//     required: true,
+//   },
+//   currentStep: {
+//     type: Object as PropType<Step>,
+//     required: true,
+//   },
+//   position: {
+//     required: true,
+//     type: String as PropType<'before' | 'after'>,
+//   },
+// });
 </script>

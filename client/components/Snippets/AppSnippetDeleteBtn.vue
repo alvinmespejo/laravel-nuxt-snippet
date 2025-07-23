@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const api = useAPI2();
 
-const handleDeleteStep = async(evt: MouseEvent) => {
+const handleDeleteStep = async(_: MouseEvent) => {
     try {
         await api.destroy(`/snippets/${props.snippet.uuid}/steps/${props.currentStep.uuid}`);
         emits('deleted', props.currentStep);

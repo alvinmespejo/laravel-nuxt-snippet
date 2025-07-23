@@ -29,11 +29,28 @@ class Step extends Model
 
     public function afterOrder(): float | int
     {
-        return 0;
+        $adjacent = self::where('order', '>', $this->order)
+                    ->orderBy('order', 'asc')
+                    ->first();
+
+        if (!$adjacent) {
+            return self::orderBy('order', 'desc')->first()->order + 1;
+        }
+
+        return ($this->order + $adjacent->order) / 2;
     }
 
     public function beforeOrder(): float | int
     {
-        return 0;
+
+        $adjacent = self::where('order', '<', $this->order)
+                    ->orderBy('order', 'desc')
+                    ->first();
+
+        if (!$adjacent) {
+            return self::orderBy('order', 'asc')->first()->order - 1;
+        }
+
+        return ($this->order + $adjacent->order) / 2;
     }
 }

@@ -27,6 +27,7 @@ const { data, error, status } = await useAsyncData<Response>(
 );
 const snippet = computed(() => data.value?.data);
 const steps = ref<Step[] | undefined>(snippet.value?.steps);
+const prevStep = ref<Step>()
 
 const {
   currentStep,
@@ -39,7 +40,14 @@ const {
   registerKeyboardShortcuts,
 } = useBrowseSnippet(steps);
 
-const handleStepAdded = () => {};
+const handleStepAdded = (step: Step | null) => {
+  if (step === undefined || step === null) {
+    return;
+  }
+  
+  steps.value?.push(step);
+  goToStep(step)
+};
 
 const handleStepDeleted = async(step: Step) => {
   if (steps.value?.length === 1) {
@@ -52,8 +60,8 @@ const handleStepDeleted = async(step: Step) => {
     return
   }
 
-  let prevStep = previousStep.value
-  goToStep(prevStep || firstStep);
+  steps.value = steps.value?.filter(s => s.uuid !== step.uuid)
+  goToStep(prevStep.value || firstStep.value);
 };
 
 function touchLastSaved() {
@@ -109,6 +117,7 @@ watch(
       method: 'PATCH',
       body: { title: step.value.title, body: step.value.body },
     });
+
     touchLastSaved();
   }, 500),
   { deep: true }
