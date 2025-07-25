@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\v1\StepStoreRequest;
+use App\Http\Requests\Api\v1\StepUpdateRequest;
+use App\Http\Resources\Api\v1\StepResource;
 use App\Models\Snippet;
 use App\Models\Step;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -41,8 +43,9 @@ class StepController extends Controller
             ]);
 
             $step = $snippet->steps()->create($data);
-            Log::debug('STEPS CREATE', [$step]);
-            return response()->json($step, Response::HTTP_CREATED);
+            // Log::debug('STEPS CREATE', [$step]);
+            return new StepResource($step);
+            // return response()->json($step, Response::HTTP_CREATED);
         } catch (\Throwable $th) {
             Log::error('ERORR STEP CREATE', [$th]);
             return response()->json([
@@ -54,12 +57,14 @@ class StepController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Snippet $snippet, Step $step)
+    public function update(StepUpdateRequest $request, Snippet $snippet, Step $step)
     {
         $this->authorize('update', $step);
+
         try {
-            $step->update($request->only('title', 'body'));
-            return response()->json($step, Response::HTTP_OK);
+            $step->update($request->safe()->only('title', 'body'));
+            // return response()->json($step, Response::HTTP_OK);
+            return new StepResource($step);
         } catch (\Throwable $th) {
             Log::error('ERORR STEP UPDATE', [$th]);
             return response()->json([

@@ -25,8 +25,9 @@ const { data, error, status } = await useFetchAPI<Response, Snippet>(
   `/snippets/${id}`,
   options
 );
+
 const snippet = computed(() => data.value);
-const steps = computed<Step[] | undefined>(() => snippet.value?.steps);
+const steps = computed<Step[]>(() => snippet.value?.steps || []);
 
 const {
   currentStep,
@@ -41,16 +42,16 @@ useHead({
   title: snippet.value?.title || 'Untitled Snippet',
 });
 
+onMounted(() => {
+  registerKeyboardShortcuts();
+});
+
 definePageMeta({
   layout: 'dashboard',
   auth: {
     unauthenticatedOnly: false,
     navigateUnauthenticatedTo: '/auth/signin',
-  },
-});
-
-onMounted(() => {
-  registerKeyboardShortcuts();
+  }
 });
 </script>
 
@@ -109,29 +110,29 @@ onMounted(() => {
                   />
                 </svg>
               </AppSnippetStepButton>
-
-              <NuxtLink
-                v-if="snippet?.owner"
-                :to="{
-                  name: 'snippets-id-edit',
-                  params: { id: snippet.uuid },
-                  query: {
-                    step: currentStep.uuid,
-                  },
-                }"
-                class="block mb-2 p-3 bg-blue-500 rounded-lg order-first lg:order-last mr-2 lg:mr-0"
-                title="Edit step"
-              >
-                <svg
-                  class="fill-current text-white h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
+              <template v-if="snippet?.owner">
+                <NuxtLink
+                  :to="{
+                    name: 'snippets-id-edit',
+                    params: { id: snippet.uuid },
+                    query: {
+                      step: currentStep.uuid,
+                    },
+                  }"
+                  class="block mb-2 p-3 bg-blue-500 rounded-lg order-first lg:order-last mr-2 lg:mr-0"
+                  title="Edit step"
                 >
-                  <path
-                    d="M6.3 12.3l10-10a1 1 0 0 1 1.4 0l4 4a1 1 0 0 1 0 1.4l-10 10a1 1 0 0 1-.7.3H7a1 1 0 0 1-1-1v-4a1 1 0 0 1 .3-.7zM8 16h2.59l9-9L17 4.41l-9 9V16zm10-2a1 1 0 0 1 2 0v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6c0-1.1.9-2 2-2h6a1 1 0 0 1 0 2H4v14h14v-6z"
-                  />
-                </svg>
-              </NuxtLink>
+                  <svg
+                    class="fill-current text-white h-6 w-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M6.3 12.3l10-10a1 1 0 0 1 1.4 0l4 4a1 1 0 0 1 0 1.4l-10 10a1 1 0 0 1-.7.3H7a1 1 0 0 1-1-1v-4a1 1 0 0 1 .3-.7zM8 16h2.59l9-9L17 4.41l-9 9V16zm10-2a1 1 0 0 1 2 0v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6c0-1.1.9-2 2-2h6a1 1 0 0 1 0 2H4v14h14v-6z"
+                    />
+                  </svg>
+                </NuxtLink>
+              </template>
             </div>
           </div>
           <div class="w-full lg:w-4/12">

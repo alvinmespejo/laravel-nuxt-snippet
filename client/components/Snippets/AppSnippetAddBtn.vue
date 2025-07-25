@@ -23,7 +23,7 @@ const api = useAPI2()
 
 interface Props {
   snippet: Snippet;
-  currentStep: Step;
+  currentStep: Step | undefined;
   position: 'before' | 'after'
 }
 
@@ -37,18 +37,21 @@ interface Form {
   [key:string]: any
 }
 
+interface ApiResponse {
+  data: Step
+}
+
 const handleAddStep = async(_: MouseEvent) => {
   let stepForm: Form = {
     'position': props.position,
-    'uuid': props.currentStep.uuid 
+    'uuid': props.currentStep?.uuid 
   }
 
-  let response = await api.post<Step, Form>(
-    `/snippets/${props.snippet.uuid}/steps`, stepForm,
-    { transform: (resp: { data: Step }): Step => resp.data }
+  let response = await api.post<ApiResponse, Form>(
+    `/snippets/${props.snippet.uuid}/steps`, 
+    stepForm
   )
-
-  emits('added', response.data)
+  emits('added', response.data ?? null)
 };
 // defineProps({
 //   snippet: {

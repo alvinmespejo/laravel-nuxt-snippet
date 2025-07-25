@@ -1,54 +1,52 @@
 <script setup lang="ts">
-import { EditorView, keymap, ViewUpdate } from '@codemirror/view';
-import { EditorState } from '@codemirror/state';
-import { defaultKeymap, indentWithTab } from '@codemirror/commands';
+import CodeMirror from 'codemirror';
 
-const props = defineProps<{ step: Step }>();
+
+const props = defineProps<{ step: Step | null }>();
 const emit = defineEmits<{
   (e: 'input', value: string): void;
 }>();
 
-const editorElm = ref<HTMLElement>();
-let view: EditorView | null = null;
+const editorElm = ref<HTMLTextAreaElement | null>(null);
+let cm: CodeMirror.Editor | null = null
 
 watch(
-  () => props.step.uuid,
+  () => props.step?.uuid,
   () => {
-    if (view) {
-      view.dispatch({
-        changes: {
-          from: 0,
-          to: view.state.doc.length,
-          insert: props.step.body || '',
-        },
-      });
+    if (cm && props.step?.body) {
+      cm.setValue(props.step?.body)
     }
   }
 );
 
 onMounted(() => {
   if (!editorElm.value) return;
-  view = new EditorView({
-    state: EditorState.create({
-      doc: props.step.body || '',
-      extensions: [
-        keymap.of([indentWithTab, ...defaultKeymap]),
-        // javascript(),
-        EditorView.lineWrapping,
-        EditorView.updateListener.of((v: ViewUpdate) => {
-          if (v.docChanged) {
-            emit('input', v.state.doc.toString());
-          }
-        }),
-      ],
-    }),
+  
+  cm = CodeMirror.fromTextArea(editorElm.value, {
+    value: props.step?.body || '',
+    mode: 'markdown',
+    indentUnit: 2,
+    indentWithTabs: false,
+    smartIndent: true,
+    lineWrapping: true,
+    lineNumbers: false,
+    theme: 'default',
+    tabSize: 2,
+    extraKeys: {
+      Tab: codemirror => codemirror.execCommand("indentMore"),
+      "Shift-Tab": codemirror => codemirror.execCommand("indentLess")
+    }
+  });
+
+  cm.setValue(props.step?.body || '')
+  cm.on('change', (instance) => {
+    emit('input', instance.getValue());
   });
 });
 
 onBeforeMount(() => {
-  if (view) {
-    view.destroy();
-    view = null;
+  if (cm) {
+    cm = null;
   }
 });
 </script>
@@ -57,13 +55,16 @@ onBeforeMount(() => {
   <div>
     <textarea 
         ref="editorElm" 
-        class="font-sans text-base w-full max-w-full border-gray-400 border-dashed border-2 rounded-lg mb-6 p-6"></textarea>
-    <div class="bg-white rounded-lg p-8 text-gray-600">
-      <SnippetsAppSnippetStepMarkdown :value="props.step.body" />
+        class="font-sans text-base w-full max-w-full border-gray-400 border-dashed border-2 rounded-lg mb-6 p-6">
+    </textarea>
+    <div class="bg-white rounded-lg p-8 mt-5 text-gray-600">
+      <SnippetsAppSnippetStepMarkdown :value="props.step?.body ?? ''" />
     </div>
   </div>
 </template>
 
-<style scoped>
-
+<style module>
+.CodeMirror {
+  @apply font-sans text-base w-full max-w-full border-gray-400 border-dashed border-2 rounded-lg mb-6 p-8;
+}
 </style>

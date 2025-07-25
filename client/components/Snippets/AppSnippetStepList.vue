@@ -1,6 +1,6 @@
 <script setup lang="ts">
 interface Props {
-  currentStep: Step;
+  currentStep: Step | undefined;
   steps: Step[];
 }
 defineProps<Props>();
@@ -14,7 +14,7 @@ defineProps<Props>();
         :key="index"
       >
         <NuxtLink
-          :class="{ 'font-bold': step.uuid === currentStep.uuid }"
+          :class="{ 'font-bold': step.uuid === currentStep?.uuid }"
           :to="{ query: { step: step.uuid } }"
         >
           {{ index + 1 }} {{ step.title }}

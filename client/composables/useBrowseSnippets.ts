@@ -1,11 +1,13 @@
 import { orderBy as _orderBy } from 'lodash';
 import hotkeys from 'hotkeys-js';
 
-export function useBrowseSnippet(steps: Ref<Step[] | undefined>) {
-  
+export function useBrowseSnippet(stepsInput: Ref<Step[]> | Step[]) {
   const router = useRouter();
   const route = useRoute();
-
+  const steps = isRef(stepsInput) 
+    ? stepsInput 
+    : ref(stepsInput)
+  
   const orderedStepAsc = computed(() => {
     return _orderBy(steps.value, 'order', 'asc');
   });
@@ -36,6 +38,7 @@ export function useBrowseSnippet(steps: Ref<Step[] | undefined>) {
     return orderedStepAsc.value.find(
       (step) => step.order > currentStep.value.order
     ) || orderedStepAsc.value?.[0];
+
   });
 
   const previousStep = computed(() => {
@@ -55,7 +58,7 @@ export function useBrowseSnippet(steps: Ref<Step[] | undefined>) {
   };
 
   const registerKeyboardShortcuts = () => {
-    hotkeys('ctrl+shift+left,ctrl+shift+right', (event, handler) => {
+    hotkeys('ctrl+shift+left,ctrl+shift+right', (_, handler) => {
       switch (handler.key) {
         case 'ctrl+shift+left':
           if (previousStep.value) {

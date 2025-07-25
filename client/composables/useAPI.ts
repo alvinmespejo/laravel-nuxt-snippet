@@ -18,11 +18,11 @@ interface ApiConfig {
   unauthorizedRedirect?: string; // Route to redirect to on 401
 }
 
-const { token } = useAuth()
-const configEnv = useRuntimeConfig();
 
 export function useAPI<TResponse, TBody = unknown>(config: ApiConfig = {}) {
   // Create a custom $fetch instance with a 401 interceptor
+  const { token } = useAuth()
+  const configEnv = useRuntimeConfig();
   const customFetch = $fetch.create({
     baseURL: `${configEnv.public.apiBaseURL}/api`,
     onRequest({ options }) {

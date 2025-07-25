@@ -132,6 +132,7 @@ import { useAuth } from '#imports';
 //   });
 // });
 
+
 export default defineNuxtPlugin((nuxtApp) => {
   const { token, signOut } = useAuth();
   const config = useRuntimeConfig();
@@ -149,6 +150,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         await signOut();
         await nuxtApp.runWithContext(() => navigateTo({ path: 'auth-signin'}));
       }
+      throw response
     },
   });
 

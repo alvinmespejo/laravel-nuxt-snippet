@@ -64,7 +64,7 @@ export default defineNuxtConfig({
         type: 'Bearer',
         cookieName: 'auth.token',
         headerName: 'Authorization',
-        // maxAgeInSeconds: 60 * 60 * 24, // 15 min
+        maxAgeInSeconds: 60 * 60 * 1, // 1hr need to update this to 15 mins in prod
       },
       // refresh: {
       //   isEnabled: true,

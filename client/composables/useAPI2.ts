@@ -1,4 +1,4 @@
-import { $fetch } from 'ofetch';
+import { $fetch, type FetchOptions } from 'ofetch';
 import { useAsyncData, navigateTo } from '#app';
 
 interface ApiResponse<T> {
@@ -22,17 +22,21 @@ interface GenericFormData {
   [key: string]: any;
 }
 
-const { token } = useAuth();
-const configEnv = useRuntimeConfig();
 
 export function useAPI2(config: ApiConfig = {}) {
   // Create a custom $fetch instance with a 401 interceptor
   // and authorization header.
+  const { token } = useAuth();
+  const configEnv = useRuntimeConfig();
+  
   const customFetch = $fetch.create({
     baseURL: `${configEnv.public.apiBaseURL}/api`,
     onRequest({ options }) {
       if (token.value) {
         options.headers.set('Authorization', `Bearer ${token.value}`);
+      }
+
+      if (!options.headers.has('Content-Type') && options.body) {
         options.headers.set('Content-Type', 'application/json');
       }
     },
@@ -40,6 +44,8 @@ export function useAPI2(config: ApiConfig = {}) {
       if (response.status === 401) {
         await navigateTo('/auth/signin');
       }
+
+      throw response;
     },
   });
 
@@ -60,45 +66,29 @@ export function useAPI2(config: ApiConfig = {}) {
     );
 
     return {
-      data: data.value as TResponse,
+      data: data.value as any,
       error: error.value,
       status: status.value,
       execute: refresh,
     };
   };
 
-  const post = async<
+  const post = async <
     TResponse = unknown,
     TBody extends GenericFormData = GenericFormData,
   >(
     url: string,
     body: TBody,
-    options: ApiOptions = {}
-  ): Promise<ApiResponse<TResponse>> => {
-    const { data, status, error, refresh } = await useAsyncData<TResponse>(
-      `POST_${url}_${Date.now()}`,
-      async () => {
-        try {
-          return await customFetch<TResponse>(url, {
-            method: 'POST',
-            body: body,
-            headers: options.headers,
-            query: options.query,
-            ...(options.transform && { transform: options.transform }),
-          });
-        } catch (err) {
-          throw err;
-        }
-      }
-    );
-
-    return {
-      data: data.value as TResponse,
-      error: error.value,
-      status: status.value,
-      execute: refresh,
-    };
+    options: FetchOptions = {}
+  ): Promise<TResponse> => {
+    return await customFetch<TResponse>(url, {
+      method: 'POST',
+      body: body,
+      headers: options.headers,
+      query: options.query,
+    });
   };
+  
 
   const patch = async<
     TResponse = unknown,
@@ -106,31 +96,14 @@ export function useAPI2(config: ApiConfig = {}) {
   >(
     url: string,
     body: TBody,
-    options: ApiOptions = {}
-  ): Promise<ApiResponse<TResponse>> => {
-    const { data, status, error, refresh } = await useAsyncData<TResponse>(
-      `PATCH_${url}_${Date.now()}`,
-      async () => {
-        try {
-          return await customFetch<TResponse>(url, {
-            method: 'PATCH',
-            body: body,
-            headers: options.headers,
-            query: options.query,
-            ...(options.transform && { transform: options.transform }),
-          });
-        } catch (err) {
-          throw err;
-        }
-      }
-    );
-
-    return {
-      data: data.value as TResponse,
-      error: error.value,
-      status: status.value,
-      execute: refresh,
-    };
+    options: FetchOptions = {}
+  ): Promise<TResponse> => {
+    return await customFetch<TResponse>(url, { 
+      method: 'PATCH', 
+      body: body,
+      headers: options.headers,
+      query: options.query
+    })
   };
 
   const destroy = async <
