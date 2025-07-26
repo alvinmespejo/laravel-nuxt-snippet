@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import CodeMirror from 'codemirror';
+import 'codemirror/mode/markdown/markdown';
+import 'codemirror/addon/edit/closebrackets';
+import 'codemirror/addon/display/placeholder';
 
 
-const props = defineProps<{ step: Step | null }>();
+
+const props = defineProps<{ step: Step }>();
 const emit = defineEmits<{
   (e: 'input', value: string): void;
 }>();
@@ -13,17 +17,17 @@ let cm: CodeMirror.Editor | null = null
 watch(
   () => props.step?.uuid,
   () => {
-    if (cm && props.step?.body) {
-      cm.setValue(props.step?.body)
+    if (cm && props.step) {
+      cm.setValue(props.step.body ?? '')
     }
   }
 );
 
 onMounted(() => {
   if (!editorElm.value) return;
-  
+
   cm = CodeMirror.fromTextArea(editorElm.value, {
-    value: props.step?.body || '',
+    value: props.step?.body,
     mode: 'markdown',
     indentUnit: 2,
     indentWithTabs: false,
@@ -38,17 +42,18 @@ onMounted(() => {
     }
   });
 
-  cm.setValue(props.step?.body || '')
+  cm.setValue(props.step.body || '')
   cm.on('change', (instance) => {
     emit('input', instance.getValue());
   });
 });
 
-onBeforeMount(() => {
+onBeforeUnmount(() => {
   if (cm) {
     cm = null;
   }
 });
+
 </script>
 
 <template>
@@ -58,7 +63,7 @@ onBeforeMount(() => {
         class="font-sans text-base w-full max-w-full border-gray-400 border-dashed border-2 rounded-lg mb-6 p-6">
     </textarea>
     <div class="bg-white rounded-lg p-8 mt-5 text-gray-600">
-      <SnippetsAppSnippetStepMarkdown :value="props.step?.body ?? ''" />
+      <SnippetsAppSnippetStepMarkdown :value="props.step.body" />
     </div>
   </div>
 </template>

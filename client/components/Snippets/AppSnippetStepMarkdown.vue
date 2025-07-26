@@ -4,8 +4,8 @@ import hljs from 'highlight.js/lib/core';
 import typesscript from 'highlight.js/lib/languages/typescript';
 hljs.registerLanguage('typescript', typesscript);
 
-import 'codemirror/lib/codemirror.css';
-import 'highlight.js/styles/github.css';
+// import 'codemirror/lib/codemirror.css';
+// import 'highlight.js/styles/github.css';
 
 // Option 1
 interface Body {
@@ -18,19 +18,22 @@ interface Body {
 const props = defineProps<Body>();
 
 const md = new Markdownit({
+  html: true,
+  linkify: true,
+  typographer: true,
   highlight: function (str: string, lang: string): string {
     const esc = md.utils.escapeHtml;
     if (lang && hljs.getLanguage(lang)) {
-      return (
-        '<pre class="hljs language-' +
-        esc(lang.toLowerCase()) +
-        '"><code>' +
-        hljs.highlightAuto(esc(str)).value +
-        '</code></pre>'
-      );
+      try {
+        return '<pre><code class="hljs">' +
+          hljs.highlight(str, {language: lang, ignoreIllegals: true}).value
+          + '</code></pre>'
+      } catch (__) {
+        // TODO - show error 
+      }
     }
 
-    return '<pre class="hljs"><code>' + esc(str) + '</code></pre>'; // use external default escaping
+    return '<pre><code class="hljs">' + esc(str) + "</code></pre>";
   },
 });
 

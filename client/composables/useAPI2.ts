@@ -102,67 +102,37 @@ export function useAPI2(config: ApiConfig = {}) {
       method: 'PATCH', 
       body: body,
       headers: options.headers,
-      query: options.query
+      // query: options.query
+      ...{ options }
     })
   };
 
-  const destroy = async <
-    TResponse
-  >(
-    url: string,
-    options: ApiOptions = {}
-  ): Promise<ApiResponse<TResponse>> => {
-    const { data, status, error, refresh } = await useAsyncData<TResponse>(
-      `DELETE_${url}_${Date.now()}`,
-      async () => {
-        return await customFetch<TResponse>(url, {
-          method: 'DELETE',
-          headers: options.headers,
-          query: options.query,
-          ...(options.transform && { transform: options.transform }),
-        });
-      }
-    );
-
-    return {
-      data: data.value as TResponse,
-      error: error.value,
-      status: status.value,
-      execute: refresh,
-    };
-  };
-
-  const put = async<
+  const put = async <
     TResponse = unknown,
     TBody extends GenericFormData = GenericFormData,
   >(
     url: string,
     body: TBody,
-    options: ApiOptions = {}
-  ): Promise<ApiResponse<TResponse>> => {
-    const { data, status, error, refresh } = await useAsyncData<TResponse>(
-      `PUT_${url}_${Date.now()}`,
-      async () => {
-        try {
-          return await customFetch<TResponse>(url, {
-            method: 'PUT',
-            body: body as any,
-            headers: options.headers,
-            query: options.query,
-            ...(options.transform && { transform: options.transform }),
-          });
-        } catch (err) {
-          throw err;
-        }
-      }
-    );
+    options: FetchOptions = {}
+  ): Promise<TResponse> => {
+    return await customFetch<TResponse>(url, {
+      method: 'PUT',
+      body: body,
+      // headers: options.headers,
+      // query: options.query,
+      ...{ options }
+    });
+  };
 
-    return {
-      data: data.value as TResponse,
-      error: error.value,
-      status: status.value,
-      execute: refresh,
-    };
+  const destroy = async<TResponse>(
+    url: string,
+    options: FetchOptions = {}
+  ): Promise<TResponse> => {
+    return await customFetch<TResponse>(url, {
+      method: 'DELETE',
+      headers: options.headers,
+      query: options.query,
+    });
   };
 
   return { 

@@ -6,6 +6,8 @@ import AppSnippetAddBtn from '~/components/Snippets/AppSnippetAddBtn.vue';
 import AppSnippetStepList from '~/components/Snippets/AppSnippetStepList.vue';
 import AppSnippetStepEditor from '~/components/Snippets/AppSnippetStepEditor.vue';
 
+import type {FetchOptions} from 'ofetch'
+
 const api = useAPI2();
 const route = useRoute();
 const { $api } = useNuxtApp();
@@ -23,7 +25,12 @@ interface SnippetForm {
   is_public?: boolean;
 }
 
-interface StepForm {
+// interface StepForm {
+//   title?: string;
+//   body?: string;
+// }
+
+type StepForm = {
   title?: string;
   body?: string;
 }
@@ -70,11 +77,8 @@ const handleStepAdded = (step: Step | null) => {
     return;
   }
 
-  // snippet.value?.steps?.push(step)
   steps.value.push(step)
   goToStep(step)
-  console.log(step)
-  console.log(currentStep)
 };
 
 const handleStepDeleted = async (step: Step) => {
@@ -124,10 +128,15 @@ watch(
   () => snippet.value?.title,
   _debounce(async (title) => {
     try {
+      let opts: FetchOptions = {
+        retry: 2
+      }
+
       let form: SnippetForm = { title: title };
       await api.patch<ApiResponse, SnippetForm>(
         `/snippets/${snippet.value?.uuid}`,
-        form
+        form,
+        opts
       );
     } catch (e: any) {
       console.error('ERROR updating snippet title', e);
@@ -141,9 +150,9 @@ watch(
   () => snippet.value?.is_public,
   _debounce(async (isPublic) => {
     let form: SnippetForm = { is_public: isPublic };
-    await api.patch(`/snippets/${snippet.value?.uuid}`, {
-      form,
-    });
+    await api.patch(`/snippets/${snippet.value?.uuid}`, 
+      form
+    );
 
     touchLastSaved();
   }, 500)
@@ -156,12 +165,11 @@ watch(
       title: step.value.title,
       body: step.value.body,
     };
-
-    let s = await api.patch<ApiStepResponse, StepForm>(
+    
+    await api.patch<ApiStepResponse, StepForm>(
       `/snippets/${snippet.value?.uuid}/steps/${step.value.uuid}`,
       form
     );
-    console.log(s.data)
 
     touchLastSaved();
   }, 500),

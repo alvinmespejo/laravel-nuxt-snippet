@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     autoImport: true,
   },
   devtools: {
-    enabled: false,
+    enabled: true,
 
     timeline: {
       enabled: false,

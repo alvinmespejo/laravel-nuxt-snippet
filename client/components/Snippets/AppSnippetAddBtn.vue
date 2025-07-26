@@ -38,7 +38,7 @@ interface Form {
 }
 
 interface ApiResponse {
-  data: Step
+  data: Step | null
 }
 
 const handleAddStep = async(_: MouseEvent) => {
@@ -51,7 +51,7 @@ const handleAddStep = async(_: MouseEvent) => {
     `/snippets/${props.snippet.uuid}/steps`, 
     stepForm
   )
-  emits('added', response.data ?? null)
+  emits('added', response.data)
 };
 // defineProps({
 //   snippet: {
