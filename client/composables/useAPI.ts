@@ -96,7 +96,7 @@ export function useAPI() {
     return await customFetch<TResponse>(url, {
       method: 'PATCH',
       body: body,
-      headers: options.headers,
+      // headers: options.headers,
       // query: options.query
       ...{ options },
     });

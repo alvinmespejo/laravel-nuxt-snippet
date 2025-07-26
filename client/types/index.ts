@@ -1,5 +1,5 @@
 declare global {
-  interface ValidationErr {
+  interface APIResponseError {
     [key: string]: string | string[];
   }
 

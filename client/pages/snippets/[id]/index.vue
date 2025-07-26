@@ -8,20 +8,20 @@ import { useFetchAPI } from '~/composables/useFetchAPI';
 const route = useRoute();
 const { id } = route.params;
 
-interface Response {
+type ApiResponse = {
   data: Snippet;
-}
+};
 
-const options: UseFetchOptions<Response, Snippet> = {
+const options: UseFetchOptions<ApiResponse, Snippet> = {
   method: 'GET',
   query: {
     limit: 15,
     public: true,
   },
-  transform: (resp: Response): Snippet => resp.data,
+  transform: (resp: ApiResponse): Snippet => resp.data,
 };
 
-const { data, error, status } = await useFetchAPI<Response, Snippet>(
+const { data, error, status } = await useFetchAPI<ApiResponse, Snippet>(
   `/snippets/${id}`,
   options,
 );
@@ -171,8 +171,12 @@ definePageMeta({
           </div>
         </div>
       </template>
-      <template v-if="status === 'idle' || status === 'pending'" />
-      <template v-if="error" />
+      <template v-if="status === 'idle' || status === 'pending'">
+        Loading snippets...
+      </template>
+      <template v-if="error">
+        Error loading snippets...
+      </template>
     </ClientOnly>
   </div>
 </template>

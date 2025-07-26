@@ -7,27 +7,24 @@ import AppSnippetStepList from '~/components/Snippets/AppSnippetStepList.vue';
 import AppSnippetStepEditor from '~/components/Snippets/AppSnippetStepEditor.vue';
 
 import type { FetchOptions } from 'ofetch';
+import { toast } from 'vue-sonner';
 
 const api = useAPI();
 const route = useRoute();
+const errors = ref<APIResponseError>({});
 
-interface ApiResponse {
+type ApiResponse = {
   data: Snippet;
-}
+};
 
-interface ApiStepResponse {
+type ApiStepResponse = {
   data: Step;
-}
+};
 
-interface SnippetForm {
+type SnippetForm = {
   title?: string;
   is_public?: boolean;
-}
-
-// interface StepForm {
-//   title?: string;
-//   body?: string;
-// }
+};
 
 type StepForm = {
   title?: string;
@@ -99,6 +96,10 @@ const handleStepDeleted = async (step: Step) => {
   }
 };
 
+const handleCurrentStepBodyChange = (e: string) => {
+  currentStep.value.body = e;
+};
+
 function touchLastSaved() {
   lastSaved.value = new Date().toISOString();
 }
@@ -127,6 +128,7 @@ watch(
     try {
       const opts: FetchOptions = {
         retry: 2,
+        query: { snippet: snippet.value?.uuid },
       };
 
       const form: SnippetForm = { title: title };
@@ -135,41 +137,88 @@ watch(
         form,
         opts,
       );
+
+      touchLastSaved();
     }
     catch (e: Error | any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      console.error('ERROR updating snippet title', e);
-    }
+      error.value
+        = e.statusCode === 422 ? e.data.errors : { general: e.message };
 
-    touchLastSaved();
+      if (e.statusCode >= 500) {
+        toast.error('Error', {
+          description: errors.value.general,
+        });
+      }
+
+      if (e.statusCode === 422) {
+        toast.warning('Invalid Input', {
+          description: errors.value,
+        });
+      }
+    }
   }, 500),
 );
 
 watch(
   () => snippet.value?.is_public,
   _debounce(async (isPublic) => {
-    const form: SnippetForm = { is_public: isPublic };
-    await api.patch(`/snippets/${snippet.value?.uuid}`,
-      form,
-    );
+    try {
+      const form: SnippetForm = { is_public: isPublic };
+      await api.patch(`/snippets/${snippet.value?.uuid}`, form);
 
-    touchLastSaved();
+      touchLastSaved();
+    }
+    catch (e: Error | any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      error.value
+        = e.statusCode === 422 ? e.data.errors : { general: e.message };
+
+      if (e.statusCode >= 500) {
+        toast.error('Error', {
+          description: errors.value.general,
+        });
+      }
+
+      if (e.statusCode === 422) {
+        toast.warning('Invalid Input', {
+          description: errors.value,
+        });
+      }
+    }
   }, 500),
 );
 
 watch(
   () => currentStep,
   _debounce(async (step) => {
-    const form: StepForm = {
-      title: step.value.title,
-      body: step.value.body,
-    };
+    try {
+      const form: StepForm = {
+        title: step.value.title,
+        body: step.value.body,
+      };
 
-    await api.patch<ApiStepResponse, StepForm>(
-      `/snippets/${snippet.value?.uuid}/steps/${step.value.uuid}`,
-      form,
-    );
+      await api.patch<ApiStepResponse, StepForm>(
+        `/snippets/${snippet.value?.uuid}/steps/${step.value.uuid}`,
+        form,
+      );
 
-    touchLastSaved();
+      touchLastSaved();
+    }
+    catch (e: Error | any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      error.value
+        = e.statusCode === 422 ? e.data.errors : { general: e.message };
+
+      if (e.statusCode >= 500) {
+        toast.error('Error', {
+          description: errors.value.general,
+        });
+      }
+
+      if (e.statusCode === 422) {
+        toast.warning('Invalid Input', {
+          description: errors.value,
+        });
+      }
+    }
   }, 500),
   { deep: true },
 );
@@ -191,10 +240,6 @@ definePageMeta({
     navigateUnauthenticatedTo: '/auth/signin',
   },
 });
-
-const handleCurrentStepBodyChange = (e: string) => {
-  currentStep.value.body = e;
-};
 </script>
 
 <template>
@@ -366,7 +411,7 @@ const handleCurrentStepBodyChange = (e: string) => {
           </div>
         </div>
       </div>
-      <div v-if="status == 'idle' || status =='pending'">
+      <div v-if="status == 'idle' || status == 'pending'">
         Loading snippets
       </div>
       <div v-if="error">

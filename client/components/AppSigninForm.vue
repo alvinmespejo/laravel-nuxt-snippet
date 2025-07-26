@@ -20,7 +20,7 @@ import { toast } from 'vue-sonner';
 
 const { signIn } = useAuth();
 const isSigningIn = ref<boolean>(false);
-const errors = ref<ValidationErr>({});
+const errors = ref<APIResponseError>({});
 
 const zodSchema = z.object({
   email: z.string().email('Must be a valid email'),
@@ -43,15 +43,15 @@ const onSubmit = form.handleSubmit(async (values) => {
   }
   catch (e: Error | any) {
     errors.value
-      = e.statusCode === 422 ? e.data.errors : { general: e.message };
+      = e.statusCode === 422
+        ? e.data.errors
+        : { general: e.message };
 
     if (e.statusCode === 422) {
       errors.value = e.data.errors;
     }
     else if (e.statusCode === 401) {
       errors.value = { general: e.data.data };
-      console.log(errors.value.general);
-
       toast.error('Error', {
         description: errors.value.general,
       });

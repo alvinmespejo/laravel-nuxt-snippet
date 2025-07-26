@@ -3,17 +3,18 @@ import * as z from 'zod';
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { FormField } from './ui/form';
-import FormItem from './ui/form/FormItem.vue';
-import FormLabel from './ui/form/FormLabel.vue';
-import FormControl from './ui/form/FormControl.vue';
-import FormMessage from './ui/form/FormMessage.vue';
+// import { Button } from '@/components/ui/button';
+// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+// import { Input } from '@/components/ui/input';
+// import { FormField } from './ui/form';
+// import FormItem from './ui/form/FormItem.vue';
+// import FormLabel from './ui/form/FormLabel.vue';
+// import FormControl from './ui/form/FormControl.vue';
+// import FormMessage from './ui/form/FormMessage.vue';
+import { toast } from 'vue-sonner';
 
 const { signUp } = useAuth();
-const errors = ref<ValidationErr>({});
+const errors = ref<APIResponseError>({});
 const isCreatingAccount = ref<boolean>(false);
 
 const zodSchema = z.object({
@@ -49,13 +50,19 @@ const onSubmit = form.handleSubmit(async (values) => {
     form.resetForm();
     setTimeout(() => {
       isCreatingAccount.value = false;
-    }, 1500);
-    /* eslint-disable  @typescript-eslint/no-explicit-any */
+    }, 1000);
   }
-  catch (e: Error | any) {
+  catch (e: Error | any) { /* eslint-disable-line  @typescript-eslint/no-explicit-any */
     errors.value = e.statusCode === 422
       ? e.data.errors
       : { general: e.message };
+
+    if (e.statusCode >= 500) {
+      toast.error('Error', {
+        description: errors.value.general,
+      });
+    }
+
     setTimeout(() => {
       isCreatingAccount.value = false;
     }, 1000);
