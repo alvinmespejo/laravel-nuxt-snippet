@@ -4,10 +4,10 @@ import hotkeys from 'hotkeys-js';
 export function useBrowseSnippet(stepsInput: Ref<Step[]> | Step[]) {
   const router = useRouter();
   const route = useRoute();
-  const steps = isRef(stepsInput) 
-    ? stepsInput 
-    : ref(stepsInput)
-  
+  const steps = isRef(stepsInput)
+    ? stepsInput
+    : ref(stepsInput);
+
   const orderedStepAsc = computed(() => {
     return _orderBy(steps.value, 'order', 'asc');
   });
@@ -36,15 +36,14 @@ export function useBrowseSnippet(stepsInput: Ref<Step[]> | Step[]) {
 
   const nextStep = computed(() => {
     return orderedStepAsc.value.find(
-      (step) => step.order > currentStep.value.order
+      step => step.order > currentStep.value.order,
     ) || orderedStepAsc.value?.[0];
-
   });
 
   const previousStep = computed(() => {
     return (
       orderedStepsDesc.value.find(
-        (step) => step.order < currentStep.value.order
+        step => step.order < currentStep.value.order,
       ) || orderedStepsDesc.value?.[0]
     );
   });

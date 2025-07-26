@@ -6,11 +6,10 @@ import AppSnippetAddBtn from '~/components/Snippets/AppSnippetAddBtn.vue';
 import AppSnippetStepList from '~/components/Snippets/AppSnippetStepList.vue';
 import AppSnippetStepEditor from '~/components/Snippets/AppSnippetStepEditor.vue';
 
-import type {FetchOptions} from 'ofetch'
+import type { FetchOptions } from 'ofetch';
 
 const api = useAPI();
 const route = useRoute();
-const { $api } = useNuxtApp();
 
 interface ApiResponse {
   data: Snippet;
@@ -33,27 +32,25 @@ interface SnippetForm {
 type StepForm = {
   title?: string;
   body?: string;
-}
+};
 
 const { token } = useAuth();
 
-const snippetId = computed(() => route.params.id)
+const snippetId = computed(() => route.params.id);
 
 const { data, error, status } = await useAsyncData<ApiResponse>(
-  `snippet-${snippetId}`,
+  `snippet-${snippetId.value}`,
   () => {
-
-      return $fetch<ApiResponse>(`/snippets/${snippetId.value}`, {
-        baseURL: 'http://localhost:8000/api',
-        method: 'GET',
-        onRequest({options}) {
-          if (token.value) {
-            options.headers.set('Authorization', `Bearer ${token.value}`);
-          }
+    return $fetch<ApiResponse>(`/snippets/${snippetId.value}`, {
+      baseURL: 'http://localhost:8000/api',
+      method: 'GET',
+      onRequest({ options }) {
+        if (token.value) {
+          options.headers.set('Authorization', `Bearer ${token.value}`);
         }
-      });
-
-  }
+      },
+    });
+  },
 );
 
 const snippet = ref<Snippet | undefined>(data.value?.data);
@@ -77,8 +74,8 @@ const handleStepAdded = (step: Step | null) => {
     return;
   }
 
-  steps.value.push(step)
-  goToStep(step)
+  steps.value.push(step);
+  goToStep(step);
 };
 
 const handleStepDeleted = async (step: Step) => {
@@ -87,7 +84,7 @@ const handleStepDeleted = async (step: Step) => {
   }
 
   if (steps.value.length === 1) {
-    let lastStep = steps.value?.[0];
+    const lastStep = steps.value?.[0];
     if (lastStep.uuid === step.uuid) {
       await api.destroy(`/snippets/${snippet.value?.uuid}`);
       await navigateTo({ name: 'dashboard' });
@@ -97,7 +94,7 @@ const handleStepDeleted = async (step: Step) => {
   }
 
   if (snippet.value?.steps) {
-    steps.value = steps.value.filter((s) => s.uuid !== step.uuid);
+    steps.value = steps.value.filter(s => s.uuid !== step.uuid);
     goToStep(prevStep.value || firstStep.value);
   }
 };
@@ -108,7 +105,7 @@ function touchLastSaved() {
 
 const lastSavedFormatted = computed(() => {
   if (lastSaved.value) {
-    let date = new Date(lastSaved.value);
+    const date = new Date(lastSaved.value);
 
     return date.toLocaleString('en-US', {
       hour: 'numeric',
@@ -128,52 +125,53 @@ watch(
   () => snippet.value?.title,
   _debounce(async (title) => {
     try {
-      let opts: FetchOptions = {
-        retry: 2
-      }
+      const opts: FetchOptions = {
+        retry: 2,
+      };
 
-      let form: SnippetForm = { title: title };
+      const form: SnippetForm = { title: title };
       await api.patch<ApiResponse, SnippetForm>(
         `/snippets/${snippet.value?.uuid}`,
         form,
-        opts
+        opts,
       );
-    } catch (e: any) {
+    }
+    catch (e: Error | any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       console.error('ERROR updating snippet title', e);
     }
 
     touchLastSaved();
-  }, 500)
+  }, 500),
 );
 
 watch(
   () => snippet.value?.is_public,
   _debounce(async (isPublic) => {
-    let form: SnippetForm = { is_public: isPublic };
-    await api.patch(`/snippets/${snippet.value?.uuid}`, 
-      form
+    const form: SnippetForm = { is_public: isPublic };
+    await api.patch(`/snippets/${snippet.value?.uuid}`,
+      form,
     );
 
     touchLastSaved();
-  }, 500)
+  }, 500),
 );
 
 watch(
   () => currentStep,
   _debounce(async (step) => {
-    let form: StepForm = {
+    const form: StepForm = {
       title: step.value.title,
       body: step.value.body,
     };
 
     await api.patch<ApiStepResponse, StepForm>(
       `/snippets/${snippet.value?.uuid}/steps/${step.value.uuid}`,
-      form
+      form,
     );
 
     touchLastSaved();
   }, 500),
-  { deep: true }
+  { deep: true },
 );
 
 onMounted(() => {
@@ -207,10 +205,10 @@ const handleCurrentStepBodyChange = (e: string) => {
           <div class="container">
             <div class="p-6">
               <input
+                v-model="snippet.title"
                 class="text-4xl text-gray-700 font-header leading-tight mb-4 w-full block p-2 border-gray-400 border-2 rounded border-dashed"
                 placeholder="Untitled snippet"
-                v-model="snippet.title"
-              />
+              >
               <div class="text-gray-600">
                 Created by
                 <NuxtLink :to="{ name: 'dashboard' }">
@@ -226,11 +224,11 @@ const handleCurrentStepBodyChange = (e: string) => {
               {{ currentStepIndex + 1 }}/{{ steps?.length }}.
             </div>
             <input
+              v-model="currentStep.title"
               class="w-full text-xl text-gray-600 font-medium font-header p-2 py-1 bg-transparent border-gray-400 border-2 rounded border-dashed"
               type="text"
               placeholder="Untitled step"
-              v-model="currentStep.title"
-            />
+            >
           </div>
           <div class="flex flex-wrap lg:flex-nowrap">
             <div
@@ -248,27 +246,27 @@ const handleCurrentStepBodyChange = (e: string) => {
                     />
                   </svg>
                 </AppSnippetStepButton>
-  
+
                 <AppSnippetAddBtn
                   position="before"
                   :snippet="snippet"
-                  :currentStep="currentStep"
+                  :current-step="currentStep"
                   @added="handleStepAdded"
                 />
               </div>
               <div class="w-full lg:mr-2">
                 <ClientOnly>
                   <AppSnippetStepEditor
-                    @input="handleCurrentStepBodyChange"
-                    :step="currentStep"
                     v-model="currentStep.body"
+                    :step="currentStep"
+                    @input="handleCurrentStepBodyChange"
                   />
                   <template #fallback>
                     <div>Loading editor...</div>
                   </template>
                 </ClientOnly>
               </div>
-  
+
               <div
                 class="order-first lg:order-last flex flex-row-reverse lg:flex-col"
               >
@@ -286,45 +284,54 @@ const handleCurrentStepBodyChange = (e: string) => {
                 <AppSnippetAddBtn
                   position="after"
                   :snippet="snippet"
-                  :currentStep="currentStep"
+                  :current-step="currentStep"
                   @added="handleStepAdded"
                 />
                 <AppSnippetDeleteBtn
                   v-if="steps?.length"
                   :snippet="snippet"
-                  :currentStep="currentStep"
+                  :current-step="currentStep"
                   @deleted="handleStepDeleted"
                 />
               </div>
             </div>
             <div class="w-full lg:w-4/12">
               <div class="mb-5">
-                <h1 class="text-xl text-gray-600 font-medium mb-4">Steps</h1>
+                <h1 class="text-xl text-gray-600 font-medium mb-4">
+                  Steps
+                </h1>
                 <AppSnippetStepList
                   :steps="orderedStepAsc"
-                  :currentStep="currentStep"
+                  :current-step="currentStep"
                 />
               </div>
-  
+
               <div class="borde-t-2 border-gray-300 py-6">
-                <h1 class="text-xl text-gray-600 font-medium mb-2">Publishing</h1>
+                <h1 class="text-xl text-gray-600 font-medium mb-2">
+                  Publishing
+                </h1>
                 <div class="text-gray-500 text-sm mb-4">
-                  <template v-if="lastSaved"
-                    >Last saved at {{ lastSavedFormatted }}</template
-                  >
-                  <template v-else>No changes saved in this session yet</template>
+                  <template v-if="lastSaved">
+                    Last saved at {{ lastSavedFormatted }}
+                  </template>
+                  <template v-else>
+                    No changes saved in this session yet
+                  </template>
                 </div>
-  
+
                 <div class="flex items-baseline">
                   <input
+                    id="public"
                     v-model="snippet.is_public"
                     type="checkbox"
                     name="public"
-                    id="public"
                     class="mr-2"
-                  />
+                  >
                   <div>
-                    <label for="public" class="text-gray-600 font-medium">
+                    <label
+                      for="public"
+                      class="text-gray-600 font-medium"
+                    >
                       Make this snippet public
                     </label>
                     <div class="text-gray-500 text-sm">
@@ -333,7 +340,7 @@ const handleCurrentStepBodyChange = (e: string) => {
                   </div>
                 </div>
               </div>
-  
+
               <div class="text-gray-500 text-sm">
                 Use
                 <div
@@ -359,8 +366,12 @@ const handleCurrentStepBodyChange = (e: string) => {
           </div>
         </div>
       </div>
-      <!-- <div v-if="status == 'idle' || status =='pending'">Loading snippets</div>
-      <div v-if="error">Error loading...</div> -->
+      <div v-if="status == 'idle' || status =='pending'">
+        Loading snippets
+      </div>
+      <div v-if="error">
+        Error loading...
+      </div>
     </ClientOnly>
   </div>
 </template>

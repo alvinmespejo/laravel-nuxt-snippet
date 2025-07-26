@@ -57,10 +57,10 @@ const createSnippet = async () => {
   const options: UseFetchOptions<SnippetResponse, Snippet> = {
     method: 'POST',
     transform: (resp: SnippetResponse): Snippet => resp.data,
-  }
-  
+  };
+
   const { data: snippet } = await useFetchAPI<SnippetResponse, Snippet>('/snippets', options);
-  await navigateTo({name: 'snippets-id-edit', params: {id: snippet.value?.uuid}})
+  await navigateTo({ name: 'snippets-id-edit', params: { id: snippet.value?.uuid } });
 };
 </script>
 

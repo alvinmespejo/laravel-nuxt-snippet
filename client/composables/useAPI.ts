@@ -1,34 +1,30 @@
-import { $fetch, type FetchOptions } from 'ofetch';
+import { $fetch } from 'ofetch';
+import type { FetchOptions } from 'ofetch';
 import { useAsyncData, navigateTo } from '#app';
 
 interface ApiResponse<T> {
   data: T | null;
-  error: any | null;
+  error: any | null; // eslint-disable-line  @typescript-eslint/no-explicit-any
   status: 'idle' | 'pending' | 'success' | 'error';
   execute: () => Promise<void>;
 }
 
 interface ApiOptions {
   headers?: Record<string, string>;
-  query?: Record<string, any>;
-  transform?: (data: any) => any;
-}
-
-interface ApiConfig {
-  unauthorizedRedirect?: string; // Route to redirect to on 401
+  query?: Record<string, string>;
+  transform?: (data: any) => any; // eslint-disable-line  @typescript-eslint/no-explicit-any
 }
 
 interface GenericFormData {
-  [key: string]: any;
+  [key: string]: any; // eslint-disable-line  @typescript-eslint/no-explicit-any
 }
 
-
-export function useAPI(config: ApiConfig = {}) {
+export function useAPI() {
   // Create a custom $fetch instance with a 401 interceptor
   // and authorization header.
   const { token } = useAuth();
   const configEnv = useRuntimeConfig();
-  
+
   const customFetch = $fetch.create({
     baseURL: `${configEnv.public.apiBaseURL}/api`,
     onRequest({ options }) {
@@ -49,9 +45,9 @@ export function useAPI(config: ApiConfig = {}) {
     },
   });
 
-  const get = async<TResponse = unknown, TBody = unknown>(
+  const get = async<TResponse = unknown>(
     url: string,
-    options: ApiOptions = {}
+    options: ApiOptions = {},
   ): Promise<ApiResponse<TResponse>> => {
     const { data, status, error, refresh } = await useAsyncData<TResponse>(
       `GET_${url}_${Date.now()}`,
@@ -62,11 +58,11 @@ export function useAPI(config: ApiConfig = {}) {
           query: options.query,
           ...(options.transform && { transform: options.transform }),
         });
-      }
+      },
     );
 
     return {
-      data: data.value as any,
+      data: data.value as any, // eslint-disable-line  @typescript-eslint/no-explicit-any
       error: error.value,
       status: status.value,
       execute: refresh,
@@ -79,7 +75,7 @@ export function useAPI(config: ApiConfig = {}) {
   >(
     url: string,
     body: TBody,
-    options: FetchOptions = {}
+    options: FetchOptions = {},
   ): Promise<TResponse> => {
     return await customFetch<TResponse>(url, {
       method: 'POST',
@@ -88,7 +84,6 @@ export function useAPI(config: ApiConfig = {}) {
       query: options.query,
     });
   };
-  
 
   const patch = async<
     TResponse = unknown,
@@ -96,15 +91,15 @@ export function useAPI(config: ApiConfig = {}) {
   >(
     url: string,
     body: TBody,
-    options: FetchOptions = {}
+    options: FetchOptions = {},
   ): Promise<TResponse> => {
-    return await customFetch<TResponse>(url, { 
-      method: 'PATCH', 
+    return await customFetch<TResponse>(url, {
+      method: 'PATCH',
       body: body,
       headers: options.headers,
       // query: options.query
-      ...{ options }
-    })
+      ...{ options },
+    });
   };
 
   const put = async <
@@ -113,20 +108,20 @@ export function useAPI(config: ApiConfig = {}) {
   >(
     url: string,
     body: TBody,
-    options: FetchOptions = {}
+    options: FetchOptions = {},
   ): Promise<TResponse> => {
     return await customFetch<TResponse>(url, {
       method: 'PUT',
       body: body,
       // headers: options.headers,
       // query: options.query,
-      ...{ options }
+      ...{ options },
     });
   };
 
   const destroy = async<TResponse>(
     url: string,
-    options: FetchOptions = {}
+    options: FetchOptions = {},
   ): Promise<TResponse> => {
     return await customFetch<TResponse>(url, {
       method: 'DELETE',
@@ -135,11 +130,11 @@ export function useAPI(config: ApiConfig = {}) {
     });
   };
 
-  return { 
-    get, 
-    post, 
-    patch, 
-    destroy, 
-    put 
+  return {
+    get,
+    post,
+    patch,
+    destroy,
+    put,
   };
 }

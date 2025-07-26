@@ -30,7 +30,7 @@ definePageMeta({
 </script>
 
 <template>
-    <div>
+  <div>
     <div class="flex justify-between">
       <h1 class="text-xl text-gray-600 font-medium mb-6">
         Snippets

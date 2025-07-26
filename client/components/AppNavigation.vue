@@ -41,15 +41,15 @@ const { data: user, status, signOut } = useAuth();
 // })
 
 const isAuthenticated = computed(() => {
-  return status.value === 'authenticated' || status.value === 'loading'
-})
+  return status.value === 'authenticated' || status.value === 'loading';
+});
 
 const name = computed(() => {
   return user.value?.name;
 });
 
 const signout = async () => {
-  await signOut({ callbackUrl: 'auth/signin',  });
+  await signOut({ callbackUrl: 'auth/signin' });
   // await navigateTo('auth/signin')
 };
 </script>

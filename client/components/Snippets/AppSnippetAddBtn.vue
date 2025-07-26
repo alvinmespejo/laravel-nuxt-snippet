@@ -5,7 +5,7 @@
     title="Delete Snippet"
     @click.prevent="handleAddStep"
   >
-  <svg
+    <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       class="fill-current text-white h-6 w-6"
@@ -19,39 +19,39 @@
 </template>
 
 <script setup lang="ts">
-const api = useAPI()
+const api = useAPI();
 
 interface Props {
   snippet: Snippet;
   currentStep: Step | undefined;
-  position: 'before' | 'after'
+  position: 'before' | 'after';
 }
 
 const props = defineProps<Props>();
 
 const emits = defineEmits<{
-  (e: 'added', payload: Step | null): void
+  (e: 'added', payload: Step | null): void;
 }>();
 
 interface Form {
-  [key:string]: any
+  [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 interface ApiResponse {
-  data: Step | null
+  data: Step | null;
 }
 
-const handleAddStep = async(_: MouseEvent) => {
-  let stepForm: Form = {
-    'position': props.position,
-    'uuid': props.currentStep?.uuid 
-  }
+const handleAddStep = async (_: MouseEvent) => {
+  const stepForm: Form = {
+    position: props.position,
+    uuid: props.currentStep?.uuid,
+  };
 
-  let response = await api.post<ApiResponse, Form>(
-    `/snippets/${props.snippet.uuid}/steps`, 
-    stepForm
-  )
-  emits('added', response.data)
+  const response = await api.post<ApiResponse, Form>(
+    `/snippets/${props.snippet.uuid}/steps`,
+    stepForm,
+  );
+  emits('added', response.data);
 };
 // defineProps({
 //   snippet: {

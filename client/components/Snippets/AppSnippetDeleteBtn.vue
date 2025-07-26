@@ -1,17 +1,18 @@
 <script setup lang="ts">
 const api = useAPI();
 
-const handleDeleteStep = async(_: MouseEvent) => {
-    try {
-        await api.destroy(`/snippets/${props.snippet.uuid}/steps/${props.currentStep.uuid}`);
-        emits('deleted', props.currentStep);
-    } catch (e: Error | any) {
-      console.error('Error deleting step', e)
-    }
+const handleDeleteStep = async (_: MouseEvent) => {
+  try {
+    await api.destroy(`/snippets/${props.snippet.uuid}/steps/${props.currentStep.uuid}`);
+    emits('deleted', props.currentStep);
+  }
+  catch (e: Error | any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    console.error('Error deleting step', e);
+  }
 };
 
 const emits = defineEmits<{
-  (e: 'deleted', payload: Step): void
+  (e: 'deleted', payload: Step): void;
 }>();
 
 // Option 1
@@ -33,7 +34,6 @@ const props = defineProps<Props>();
 //         required: true,
 //     },
 // });
-
 </script>
 
 <template>

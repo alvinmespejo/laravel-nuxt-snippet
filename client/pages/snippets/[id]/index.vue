@@ -23,7 +23,7 @@ const options: UseFetchOptions<Response, Snippet> = {
 
 const { data, error, status } = await useFetchAPI<Response, Snippet>(
   `/snippets/${id}`,
-  options
+  options,
 );
 
 const snippet = computed(() => data.value);
@@ -51,7 +51,7 @@ definePageMeta({
   auth: {
     unauthenticatedOnly: false,
     navigateUnauthenticatedTo: '/auth/signin',
-  }
+  },
 });
 </script>
 
@@ -138,7 +138,9 @@ definePageMeta({
             </div>
             <div class="w-full lg:w-4/12">
               <div class="mb-8">
-                <h1 class="text-xl text-gra-600 font-medium mb-2">Steps</h1>
+                <h1 class="text-xl text-gra-600 font-medium mb-2">
+                  Steps
+                </h1>
                 <AppSnippetStepList
                   :steps="orderedStepAsc"
                   :current-step="currentStep"
@@ -169,8 +171,8 @@ definePageMeta({
           </div>
         </div>
       </template>
-      <template v-if="status === 'idle' || status === 'pending'"> </template>
-      <template v-if="error"> </template>
+      <template v-if="status === 'idle' || status === 'pending'" />
+      <template v-if="error" />
     </ClientOnly>
   </div>
 </template>

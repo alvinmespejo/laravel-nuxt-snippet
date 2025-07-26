@@ -73,7 +73,7 @@ export default defineNuxtConfig({
       //   token: {
       //     refreshResponseTokenPointer: '/data/access_token',
       //     signInResponseRefreshTokenPointer: '/data/access_token', // Add this line
-      //   }, 
+      //   },
       // },
       session: {
         dataType: {
