@@ -8,7 +8,7 @@ import AppSnippetStepEditor from '~/components/Snippets/AppSnippetStepEditor.vue
 
 import type {FetchOptions} from 'ofetch'
 
-const api = useAPI2();
+const api = useAPI();
 const route = useRoute();
 const { $api } = useNuxtApp();
 
@@ -165,7 +165,7 @@ watch(
       title: step.value.title,
       body: step.value.body,
     };
-    
+
     await api.patch<ApiStepResponse, StepForm>(
       `/snippets/${snippet.value?.uuid}/steps/${step.value.uuid}`,
       form

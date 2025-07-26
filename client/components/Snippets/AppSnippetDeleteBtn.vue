@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const api = useAPI2();
+const api = useAPI();
 
 const handleDeleteStep = async(_: MouseEvent) => {
     try {

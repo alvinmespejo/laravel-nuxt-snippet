@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-const api = useAPI2()
+const api = useAPI()
 
 interface Props {
   snippet: Snippet;
