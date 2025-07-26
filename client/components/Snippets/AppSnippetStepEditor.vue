@@ -27,7 +27,7 @@ onMounted(() => {
   if (!editorElm.value) return;
 
   cm = CodeMirror.fromTextArea(editorElm.value, {
-    value: props.step?.body,
+    value: props.step.body || '',
     mode: 'markdown',
     indentUnit: 2,
     indentWithTabs: false,
