@@ -14,12 +14,7 @@ interface ApiOptions {
   transform?: (data: any) => any;
 }
 
-interface ApiConfig {
-  unauthorizedRedirect?: string; // Route to redirect to on 401
-}
-
-
-export function useAPI<TResponse, TBody = unknown>(config: ApiConfig = {}) {
+export function useAPI<TResponse, TBody = unknown>() {
   // Create a custom $fetch instance with a 401 interceptor
   const { token } = useAuth()
   const configEnv = useRuntimeConfig();
@@ -28,13 +23,18 @@ export function useAPI<TResponse, TBody = unknown>(config: ApiConfig = {}) {
     onRequest({ options }) {
         if (token.value) {
           options.headers.set('Authorization', `Bearer ${token.value}`);
+        }
+
+        if (options.body && !options.headers.has('Content-Type')) {
           options.headers.set('Content-Type', 'application/json');
         }
-    },
+      },
     async onResponseError({ response }) {
       if (response.status === 401) {
         await navigateTo('/auth/signin');
       }
+
+      throw response;
     },
   });
 
