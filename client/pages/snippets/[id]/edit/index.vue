@@ -86,19 +86,17 @@ const handleStepDeleted = async (step: Step) => {
   if (!steps.value || steps.value.length <= 0) {
     return;
   }
-
+  
   if (steps.value.length === 1) {
     const lastStep = steps.value?.[0];
     if (lastStep.uuid === step.uuid) {
       await navigateTo({ name: 'dashboard' });
     }
-
-    return;
-  }
-
-  if (snippet.value?.steps) {
-    steps.value = steps.value.filter(s => s.uuid !== step.uuid);
-    goToStep(prevStep.value || firstStep.value);
+  } else if (steps.value.length > 1) {
+    if (snippet.value?.steps) {
+      steps.value = steps.value.filter(s => s.uuid !== step.uuid);
+      goToStep(prevStep.value || firstStep.value);
+    }
   }
 };
 
@@ -134,7 +132,7 @@ watch(
     try {
       const opts: FetchOptions = {
         retry: 2,
-        query: { snippet: snippet.value?.uuid },
+        query: { snippet: snippet.value?.uuid, page: 1, order: 'asc' },
       };
 
       const form: SnippetForm = { title: title };

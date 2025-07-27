@@ -55,8 +55,7 @@ export function useAPI() {
         return await customFetch<TResponse>(url, {
           method: 'GET',
           headers: options.headers,
-          query: options.query,
-          ...(options.transform && { transform: options.transform }),
+          query: options.query
         });
       },
     );
@@ -98,7 +97,7 @@ export function useAPI() {
       body: body,
       // headers: options.headers,
       // query: options.query
-      ...{ options },
+      // ...{ options },
     });
   };
 
@@ -115,7 +114,8 @@ export function useAPI() {
       body: body,
       // headers: options.headers,
       // query: options.query,
-      ...{ options },
+      // ...{ options },
+      // retry: options.retry
     });
   };
 
