@@ -19,6 +19,8 @@
 </template>
 
 <script setup lang="ts">
+import { toast } from 'vue-sonner';
+
 const api = useAPI();
 
 interface Props {
@@ -47,11 +49,17 @@ const handleAddStep = async (_: MouseEvent) => {
     uuid: props.currentStep?.uuid,
   };
 
-  const response = await api.post<ApiResponse, Form>(
-    `/snippets/${props.snippet.uuid}/steps`,
-    stepForm,
-  );
-  emits('added', response.data);
+  try {
+    const response = await api.post<ApiResponse, Form>(
+      `/snippets/${props.snippet.uuid}/steps`,
+      stepForm,
+    );
+    emits('added', response.data);
+  } catch (e: Error | any) {
+    toast.error('Error', {
+      description: e._data.error
+    })
+  }
 };
 // defineProps({
 //   snippet: {

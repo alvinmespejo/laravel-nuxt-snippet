@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { toast } from 'vue-sonner';
+
 const api = useAPI();
 
 const handleDeleteStep = async (_: MouseEvent) => {
@@ -7,7 +9,9 @@ const handleDeleteStep = async (_: MouseEvent) => {
     emits('deleted', props.currentStep);
   }
   catch (e: Error | any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-    console.error('Error deleting step', e);
+    toast.error('Error', {
+      description: e._data.error
+    })
   }
 };
 

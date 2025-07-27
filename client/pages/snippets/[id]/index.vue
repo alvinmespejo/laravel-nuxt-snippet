@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { UseFetchOptions } from '#app';
+import { toast } from 'vue-sonner';
 import AppSnippetStepButton from '~/components/Snippets/AppSnippetStepButton.vue';
 import AppSnippetStepList from '~/components/Snippets/AppSnippetStepList.vue';
 import AppSnippetStepMarkdown from '~/components/Snippets/AppSnippetStepMarkdown.vue';
@@ -25,6 +26,12 @@ const { data, error, status } = await useFetchAPI<ApiResponse, Snippet>(
   `/snippets/${id}`,
   options,
 );
+
+if (error.value && status.value === 'error') {
+  toast.error('Error', {
+    description: error.value?.statusMessage
+  })
+}
 
 const snippet = computed(() => data.value);
 const steps = computed<Step[]>(() => snippet.value?.steps || []);
@@ -175,7 +182,14 @@ definePageMeta({
         Loading snippets...
       </template>
       <template v-if="error">
-        Error loading snippets...
+        <div role="alert">
+          <div class="bg-red-500 text-white font-bold rounded-t px-4 py-2">
+            Error
+          </div>
+          <div class="border border-t-0 border-red-400 rounded-b bg-red-100 px-4 py-3 text-red-700">
+            <p>Something not ideal might be happening.</p>
+          </div>
+        </div>
       </template>
     </ClientOnly>
   </div>

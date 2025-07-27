@@ -8,6 +8,7 @@ use App\Http\Requests\Api\v1\StepUpdateRequest;
 use App\Http\Resources\Api\v1\StepResource;
 use App\Models\Snippet;
 use App\Models\Step;
+use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -43,11 +44,9 @@ class StepController extends Controller
             ]);
 
             $step = $snippet->steps()->create($data);
-            // Log::debug('STEPS CREATE', [$step]);
             return new StepResource($step);
-            // return response()->json($step, Response::HTTP_CREATED);
         } catch (\Throwable $th) {
-            Log::error('ERORR STEP CREATE', [$th]);
+            Log::error('STEP ERORR CREATE', [$th]);
             return response()->json([
                 'error' => 'An error occured while processing request. Please try again!'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -66,7 +65,7 @@ class StepController extends Controller
             // return response()->json($step, Response::HTTP_OK);
             return new StepResource($step);
         } catch (\Throwable $th) {
-            Log::error('ERORR STEP UPDATE', [$th]);
+            Log::error('STEP ERORR UPDATE', [$th]);
             return response()->json([
                 'error' => 'An error occured while processing request. Please try again!'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -80,10 +79,14 @@ class StepController extends Controller
     {
         $this->authorize('delete', $step);
         try {
-            $step->delete();
+            if ($snippet->steps->count() === 1) {
+                $snippet->delete();
+            } else {
+                $step->delete();
+            }
             return response()->json(null, Response::HTTP_NO_CONTENT);
         } catch (\Throwable $th) {
-            Log::error('ERORR STEP DELETION', [$th]);
+            Log::error('STEP ERORR DELETION', [$th]);
             return response()->json([
                 'error' => 'An error occured while processing request. Please try again!'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);

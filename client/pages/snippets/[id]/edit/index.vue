@@ -35,6 +35,7 @@ const { token } = useAuth();
 
 const snippetId = computed(() => route.params.id);
 
+// TODO: use API2 composable
 const { data, error, status } = await useAsyncData<ApiResponse>(
   `snippet-${snippetId.value}`,
   () => {
@@ -49,6 +50,12 @@ const { data, error, status } = await useAsyncData<ApiResponse>(
     });
   },
 );
+
+if (error.value && status.value === 'error') {
+  toast.error('Error', {
+    description: error.value.statusMessage
+  })
+}
 
 const snippet = ref<Snippet | undefined>(data.value?.data);
 const steps = ref<Step[]>(snippet.value?.steps || []);
@@ -83,7 +90,6 @@ const handleStepDeleted = async (step: Step) => {
   if (steps.value.length === 1) {
     const lastStep = steps.value?.[0];
     if (lastStep.uuid === step.uuid) {
-      await api.destroy(`/snippets/${snippet.value?.uuid}`);
       await navigateTo({ name: 'dashboard' });
     }
 
@@ -141,16 +147,16 @@ watch(
       touchLastSaved();
     }
     catch (e: Error | any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      error.value
-        = e.statusCode === 422 ? e.data.errors : { general: e.message };
+      errors.value
+        = parseInt(e.status) === 422 ? e.data.errors : { general: e._data.error || e.message };
 
-      if (e.statusCode >= 500) {
+      if (parseInt(e.status) >= 500) {
         toast.error('Error', {
           description: errors.value.general,
         });
       }
 
-      if (e.statusCode === 422) {
+      if (parseInt(e.status) === 422) {
         toast.warning('Invalid Input', {
           description: errors.value,
         });
@@ -169,16 +175,16 @@ watch(
       touchLastSaved();
     }
     catch (e: Error | any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      error.value
-        = e.statusCode === 422 ? e.data.errors : { general: e.message };
+      errors.value
+        = parseInt(e.status) === 422 ? e.data.errors : { general: e._data.error || e.message };
 
-      if (e.statusCode >= 500) {
+      if (parseInt(e.status) >= 500) {
         toast.error('Error', {
           description: errors.value.general,
         });
       }
 
-      if (e.statusCode === 422) {
+      if (parseInt(e.status) === 422) {
         toast.warning('Invalid Input', {
           description: errors.value,
         });
@@ -204,16 +210,16 @@ watch(
       touchLastSaved();
     }
     catch (e: Error | any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      error.value
-        = e.statusCode === 422 ? e.data.errors : { general: e.message };
+      errors.value
+      = parseInt(e.status) === 422 ? e.data.errors : { general: e._data.error || e.message };
 
-      if (e.statusCode >= 500) {
+      if (parseInt(e.status) >= 500) {
         toast.error('Error', {
           description: errors.value.general,
         });
       }
 
-      if (e.statusCode === 422) {
+      if (parseInt(e.status) === 422) {
         toast.warning('Invalid Input', {
           description: errors.value,
         });

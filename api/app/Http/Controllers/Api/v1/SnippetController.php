@@ -7,10 +7,12 @@ use App\Http\Requests\Api\v1\SnippetRequest;
 use App\Http\Resources\Api\v1\SnippetResource;
 use App\Models\Snippet;
 use App\Policies\Api\v1\SnippetPolicy;
+use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class SnippetController extends Controller
 {
@@ -55,9 +57,11 @@ class SnippetController extends Controller
             ]);
 
             return new SnippetResource($snippet->load('steps', 'user'));
-        } catch (\Throwable $th) {
-            Log::error('STORE ERROR', [$th]);
-            return response()->json(['error' => $th->getMessage()], 500);
+        } catch (Throwable $th) {
+            Log::error('SNIPPET STORE ERROR', [$th]);
+            return response()->json([
+                'error' => 'An error occured while processing request. Please try again!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
     }
@@ -70,9 +74,11 @@ class SnippetController extends Controller
         $this->authorize('view', $snippet);
         try {
             return new SnippetResource($snippet->load(['user', 'steps']));
-        } catch (\Throwable $th) {
-            Log::error('SHOW ERROR', [$th]);
-            return response()->json(['error' => $th->getMessage()], 500);
+        } catch (Throwable $th) {
+            Log::error('SNIPPET SHOW ERROR', [$th]);
+            return response()->json([
+                'error' => 'An error occured while processing request. Please try again!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -86,9 +92,11 @@ class SnippetController extends Controller
         try {
             $snippet->update($request->safe()->only('title', 'body', 'is_public'));
             return new SnippetResource($snippet);
-        } catch (\Throwable $th) {
-            Log::error('UPDATE ERROR', [$th]);
-            return response()->json(['error' => $th->getMessage()], 500);
+        } catch (Throwable $th) {
+            Log::error('SNIPPET UPDATE ERROR', [$th]);
+            return response()->json([
+                'error' => 'An error occured while processing request. Please try again!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -98,12 +106,15 @@ class SnippetController extends Controller
     public function destroy(Snippet $snippet)
     {
         $this->authorize('delete', $snippet);
+
         try {
             $snippet->delete();
-            return response()->json([], Response::HTTP_NO_CONTENT);
-        } catch (\Throwable $th) {
-            Log::error('DELETE ERROR', [$th]);
-            return response()->json(['error' => $th->getMessage()], 500);
+            return response()->json(null, Response::HTTP_NO_CONTENT);
+        } catch (Throwable $th) {
+            Log::error('SNIPPET DELETE ERROR', [$th]);
+            return response()->json([
+                'error' => 'An error occured while processing request. Please try again!'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

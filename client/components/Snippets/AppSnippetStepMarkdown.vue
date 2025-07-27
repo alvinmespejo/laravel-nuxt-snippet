@@ -24,18 +24,21 @@ const md = new Markdownit({
   typographer: true,
   highlight: function (str: string, lang: string): string {
     const esc = md.utils.escapeHtml;
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return '<pre><code class="hljs">'
-          + hljs.highlight(str, { language: lang, ignoreIllegals: true }).value
-          + '</code></pre>';
+    try {
+      if (lang && hljs.getLanguage(lang)) {
+        return (
+          '<pre class="hljs language-' +
+          esc(lang.toLowerCase()) +
+          '"><code>' +
+          hljs.highlightAuto(esc(str)).value +
+          "</code></pre>"
+        );
       }
-      catch (e) { // eslint-disable-line @typescript-eslint/no-unused-vars
-        // TODO - show error
-      }
+    } catch (e) { // eslint-disable-line @typescript-eslint/no-unused-vars
     }
 
-    return '<pre><code class="hljs">' + esc(str) + '</code></pre>';
+    return '<pre class="hljs"><code>' + esc(str) + '</code></pre>';
+      
   },
 });
 
@@ -43,7 +46,9 @@ const markdown = computed(() => md.render(props.value ?? ''));
 </script>
 
 <template>
-  <!-- eslint-disable vue/no-v-html -->
-  <div v-html="markdown" />
-  <!-- eslint-enable -->
+  <div>
+    <!-- eslint-disable vue/no-v-html -->
+    <div v-html="markdown"></div>
+    <!-- eslint-enable -->
+  </div>
 </template>
