@@ -11,10 +11,10 @@ export default defineNuxtPlugin((nuxtApp) => {
       if (token.value) {
         options.headers.set('Authorization', `Bearer ${token.value}`);
       }
-      
-      if (options.body 
-          && !options.headers.has('Content-Type') 
-          && ['PUT','PATCH', 'POST'].includes(options.method?.toUpperCase() as string)) {
+
+      if (options.body
+        && !options.headers.has('Content-Type')
+        && ['PUT', 'PATCH', 'POST'].includes(options.method?.toUpperCase() as string)) {
         options.headers.set('Content-Type', 'application/json');
       }
     },

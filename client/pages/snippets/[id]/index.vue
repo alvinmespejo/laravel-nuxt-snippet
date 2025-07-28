@@ -29,8 +29,8 @@ const { data, error, status } = await useFetchAPI<ApiResponse, Snippet>(
 
 if (error.value && status.value === 'error') {
   toast.error('Error', {
-    description: error.value?.statusMessage
-  })
+    description: error.value?.statusMessage,
+  });
 }
 
 const snippet = computed(() => data.value);

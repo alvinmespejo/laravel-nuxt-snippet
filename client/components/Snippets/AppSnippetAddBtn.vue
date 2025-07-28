@@ -55,10 +55,11 @@ const handleAddStep = async (_: MouseEvent) => {
       stepForm,
     );
     emits('added', response.data);
-  } catch (e: Error | any) {
+  }
+  catch (e: Error | any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     toast.error('Error', {
-      description: e._data.error
-    })
+      description: e._data.error,
+    });
   }
 };
 // defineProps({

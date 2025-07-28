@@ -10,8 +10,8 @@ const handleDeleteStep = async (_: MouseEvent) => {
   }
   catch (e: Error | any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     toast.error('Error', {
-      description: e._data.error
-    })
+      description: e._data.error,
+    });
   }
 };
 

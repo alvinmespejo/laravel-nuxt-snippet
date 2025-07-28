@@ -53,8 +53,8 @@ const { data, error, status } = await useAsyncData<ApiResponse>(
 
 if (error.value && status.value === 'error') {
   toast.error('Error', {
-    description: error.value.statusMessage
-  })
+    description: error.value.statusMessage,
+  });
 }
 
 const snippet = ref<Snippet | undefined>(data.value?.data);
@@ -86,13 +86,14 @@ const handleStepDeleted = async (step: Step) => {
   if (!steps.value || steps.value.length <= 0) {
     return;
   }
-  
+
   if (steps.value.length === 1) {
     const lastStep = steps.value?.[0];
     if (lastStep.uuid === step.uuid) {
       await navigateTo({ name: 'dashboard' });
     }
-  } else if (steps.value.length > 1) {
+  }
+  else if (steps.value.length > 1) {
     if (snippet.value?.steps) {
       steps.value = steps.value.filter(s => s.uuid !== step.uuid);
       goToStep(prevStep.value || firstStep.value);
