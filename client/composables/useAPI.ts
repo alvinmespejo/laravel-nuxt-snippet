@@ -112,10 +112,10 @@ export function useAPI() {
     return await customFetch<TResponse>(url, {
       method: 'PUT',
       body: body,
-      // headers: options.headers,
-      // query: options.query,
+      headers: options.headers,
+      query: options.query,
+      retry: options.retry
       // ...{ options },
-      // retry: options.retry
     });
   };
 
@@ -127,6 +127,7 @@ export function useAPI() {
       method: 'DELETE',
       headers: options.headers,
       query: options.query,
+      retry: options.retry,
     });
   };
 
